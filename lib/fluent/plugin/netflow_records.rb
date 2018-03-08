@@ -155,6 +155,31 @@ module Fluent
           end
         end
       end
+
+      class Netflow10PDU < BinData::Record
+        endian :big
+        uint16 :version
+        uint16 :flow_records_length
+        uint32 :unix_sec
+        uint32 :flow_seq_num
+        uint32 :source_id
+        array  :records, read_until: :eof do
+          uint16 :flowset_id
+          uint16 :flowset_length
+          choice :flowset_data, selection: :flowset_id do
+            template_flowset 2
+            option_flowset   3
+            string           :default, read_length: lambda { flowset_length - 4 }
+          end
+        end
+      end
+
+      class Netflow10PDU
+        def uptime
+          return 0
+        end
+      end
+
     end
   end
 end

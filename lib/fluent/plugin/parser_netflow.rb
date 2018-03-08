@@ -56,6 +56,9 @@ module Fluent
           # TODO: implement forV9
           pdu = Netflow9PDU.read(payload)
           handle_v9(host, pdu, block)
+        when 10
+          pdu = Netflow10PDU.read(payload)
+          handle_v10(host, pdu, block)
         else
           $log.warn "Unsupported Netflow version v#{version}: #{version.class}"
         end
@@ -299,6 +302,7 @@ module Fluent
 
           event['flowset_id'] = flowset.flowset_id
 
+          $log.warn "each_pair => #{r}"
           r.each_pair do |k, v|
             case k
             when :first_switched
@@ -397,6 +401,20 @@ module Fluent
       def register_sampler_v9(key, sampler)
         @samplers_v9[key, @cache_ttl] = sampler
         @samplers_v9.cleanup!
+      end
+
+
+      def handle_v10(host, pdu, block)
+        pdu.records.each do |flowset|
+          case flowset.flowset_id
+          when 2
+            handle_v9_flowset_template(host, pdu, flowset)
+          when 256..65535
+            handle_v9_flowset_data(host, pdu, flowset, block)
+          else
+            $log.warn 'Unsupported flowset', flowset_id: flowset.flowset_id
+          end
+        end
       end
     end
   end
