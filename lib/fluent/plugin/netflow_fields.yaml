@@ -287,6 +287,9 @@ option:
   236:
   - :string
   - :vrf_name
+  256:
+  - :uint16
+  - :ethernetType
 
 scope:
   1:
