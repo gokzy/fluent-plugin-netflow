@@ -302,7 +302,7 @@ module Fluent
 
           event['flowset_id'] = flowset.flowset_id
 
-          $log.warn "each_pair => #{r}"
+          $log.debug "#{r}"
           r.each_pair do |k, v|
             case k
             when :first_switched
